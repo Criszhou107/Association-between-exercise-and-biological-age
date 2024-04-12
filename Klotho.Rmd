@@ -1,0 +1,205 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/SSKL_E.xpt", tf <- tempfile(), mode="wb")
+Klotho_1 <- foreign::read.xport(tf)[,c("SEQN", "SSKLOTH")]
+names(Klotho_1) <- c("SEQN", "Klotho")
+```
+
+
+```{r}
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/SSKL_F.xpt", tf <- tempfile(), mode="wb")
+Klotho_2 <- foreign::read.xport(tf)[,c("SEQN", "SSKLOTH")]
+names(Klotho_2) <- c("SEQN", "Klotho")
+```
+
+
+```{r}
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/SSKL_G.xpt", tf <- tempfile(), mode="wb")
+Klotho_3 <- foreign::read.xport(tf)[,c("SEQN", "SSKLOTH")]
+names(Klotho_3) <- c("SEQN", "Klotho")
+```
+
+
+```{r}
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/SSKL_H.xpt", tf <- tempfile(), mode="wb")
+Klotho_4 <- foreign::read.xport(tf)[,c("SEQN", "SSKLOTH")]
+names(Klotho_4) <- c("SEQN", "Klotho")
+```
+
+```{r}
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/SSKL_I.xpt", tf <- tempfile(), mode="wb")
+Klotho_5 <- foreign::read.xport(tf)[,c("SEQN", "SSKLOTH")]
+names(Klotho_5) <- c("SEQN", "Klotho")
+```
+
+
+```{r}
+Klotho_fall <- bind_rows(Klotho_1, Klotho_2, Klotho_3, Klotho_4, Klotho_5)
+
+Falldat_Klotho <- merge(Falldat, Klotho_fall, by = "SEQN", all.x = TRUE)
+
+Falldat_Klotho$Klotho[is.na(Falldat_Klotho$Klotho)] <- 0
+Falldat_Klotho <- Falldat_Klotho[Falldat_Klotho$Klotho != 0, , drop = FALSE]
+#we included 7,968 people
+```
+
+
+```{r}
+# svy design
+des <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = Falldat_Klotho)#adjust weight before modelling
+
+#model 1 -- non-adjusted
+model_7 <- svyglm(Klotho ~ categorize_MET, data = Falldat_Klotho, design = des, family = "gaussian") 
+summary(model_7)
+
+#model 2 -- adjusted for chronological_age, Gender, Race, CDAI, Marital_Status and family Ratio_income_poverty.
+model_8 <- svyglm(Klotho ~ categorize_MET + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                  , data = Falldat_Klotho, design = des, family = "gaussian") 
+
+summary(model_8)
+
+vif_model_8 <- vif(model_8)
+print(vif_model_8)
+
+#model 3 -- adjusted for BMI + sleep_disorders + Smoked_days + Avg_alcohol_drinks + had_cancer.
+model_9 <- svyglm(Klotho ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                  , data = Falldat_Klotho, design = des, family = "gaussian") 
+summary(model_9)
+
+vif_model_9 <- vif(model_9)
+print(vif_model_9)
+
+#effect modifier 1 - MET
+model_Z <- svyglm(Klotho ~ Total_MET + as.factor(categorize_MET) + Total_MET*as.factor(categorize_MET), data = Falldat_Klotho, design = des, family = "gaussian")
+summary(model_Z)
+```
+
+
+
+```{r}
+model_10 <- svyglm(Klotho ~ categorize_PA, data = Falldat_Klotho, design = des, family = "gaussian") 
+summary(model_10)
+
+#model 2 -- adjusted for chronological_age, Gender, Race, CDAI, Marital_Status and family Ratio_income_poverty.
+model_11 <- svyglm(Klotho ~ categorize_PA + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                  , data = Falldat_Klotho, design = des, family = "gaussian") 
+
+summary(model_11)
+
+vif_model_11 <- vif(model_11)
+print(vif_model_11)
+
+#model 3 -- adjusted for BMI + sleep_disorders + Smoked_days + Avg_alcohol_drinks + had_cancer.
+model_12 <- svyglm(Klotho ~ categorize_PA + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                  , data = Falldat_Klotho, design = des, family = "gaussian") 
+summary(model_12)
+
+vif_model_12 <- vif(model_12)
+print(vif_model_12)
+
+#effect modifier 1 - MET
+model_H <- svyglm(Klotho ~ Total_MET + as.factor(categorize_PA) + Total_MET*as.factor(categorize_PA), data = Falldat_Klotho, design = des, family = "gaussian")
+summary(model_H)
+```
+
+
+
+
+```{r}
+non_model_6 <- svyglm(Klotho ~ rcs(Total_MET, 3),
+                        data = Falldat_Klotho, design = des, family = "gaussian")
+
+non_model_7 <- svyglm(Klotho ~ rcs(Total_MET, 4),
+                        data = Falldat_Klotho, design = des, family = "gaussian")
+
+non_model_8 <- svyglm(Klotho ~ rcs(Total_MET, 5),
+                        data = Falldat_Klotho, design = des, family = "gaussian")
+
+non_model_9 <- svyglm(Klotho ~ rcs(Total_MET, 6),
+                        data = Falldat_Klotho, design = des, family = "gaussian")
+
+non_model_10 <- svyglm(Klotho ~ rcs(Total_MET, 7),
+                        data = Falldat_Klotho, design = des, family = "gaussian")
+
+AIC(non_model_6, non_model_7, non_model_8, non_model_9, non_model_10)
+
+summary(non_model_7)
+```
+
+
+
+
+
+
+```{r}
+# Predict Phenotypic Age using non_model_6
+pr2 <- predict(non_model_7, type = "response")
+
+# Fit a linear regression model with a restricted cubic spline of Total_MET
+model.spline.1 <- lm(pr2 ~ rcs(Falldat_Klotho$Total_MET))
+
+
+knot.1 <- rcs(Falldat_Klotho$Total_MET, n=4)
+
+summary(model.spline.1)
+
+anova(model.spline.1)
+```
+
+
+
+
+```{r}
+ggplot(Falldat_Klotho, aes(Total_MET, Klotho)) +
+  stat_smooth(method = lm, formula = y ~ rcs(x,4)) +
+  theme_bw() +
+  theme(panel.grid.major =
+  element_blank(), panel.grid.minor = element_blank()) +
+    xlab("Total_MET") +
+    ylab("Klotho") +
+    ggtitle("RCS")
+```
+
+
+
+```{r}
+# Calculate the quantiles of Total_MET
+quantiles <- quantile(Falldat_Klotho$Total_MET, c(0.05, 0.35, 0.65, 0.95))
+
+# Create the plot with the RCS smooth
+ggplot(Falldat_Klotho, aes(Total_MET, Klotho)) +
+  stat_smooth(method = lm, formula = y ~ rcs(x, 4)) +
+  
+  # Add vertical dashed lines at the quantiles
+  geom_vline(xintercept = quantiles, linetype = "dashed", color = "red") +
+  
+  # Theme settings
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  
+  # Labels and title
+  xlab("Total MET") +
+  ylab("Klotho") +
+  ggtitle("RCS")
+```
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+
+
+

@@ -1,0 +1,420 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+#2007-2008 data cycle
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/CRP_E.xpt", tf <- tempfile(), mode="wb")
+CRP_1 <- foreign::read.xport(tf)[,c("SEQN", "LBXCRP")]
+names(CRP_1) <- c("SEQN", "CRP")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/GHB_E.xpt", tf <- tempfile(), mode="wb")
+Glycohemoglobin_1 <- foreign::read.xport(tf)[,c("SEQN", "LBXGH")]
+names(Glycohemoglobin_1) <- c("SEQN", "Glycohemoglobin")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/BIOPRO_E.xpt", tf <- tempfile(), mode="wb")
+wholeBA_1 <- foreign::read.xport(tf)[,c("SEQN", "LBDSCRSI", "LBDSCHSI", "LBDSBUSI", "LBXSAPSI", "LBDSALSI")]
+names(wholeBA_1) <- c("SEQN", "Creatinine", "Cholesterol", "Urea_nitrogen", "Alkaline_phosphotase", "Albumin")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/BPX_E.xpt", tf <- tempfile(), mode="wb")
+blood_pre_1 <- foreign::read.xport(tf)[,c("SEQN", "BPXSY3", "BPXDI3")]
+names(blood_pre_1) <- c("SEQN", "Systolic_blood_pre", "Diastolic_blood_pre")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/GLU_E.xpt", tf <- tempfile(), mode="wb")
+glucose_1 <- foreign::read.xport(tf)[,c("SEQN", "LBDGLUSI")]
+names(glucose_1) <- c("SEQN", "fasting_glucose")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/TCHOL_E.xpt", tf <- tempfile(), mode="wb")
+Cholesterol_1 <- foreign::read.xport(tf)[,c("SEQN", "LBDTCSI")]
+names(Cholesterol_1) <- c("SEQN", "Total_Cholesterol")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/HDL_E.xpt", tf <- tempfile(), mode="wb")
+High_Cholesterol_1 <- foreign::read.xport(tf)[,c("SEQN", "LBDHDDSI")]
+names(High_Cholesterol_1) <- c("SEQN", "high_density_cholesterol")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/TRIGLY_E.xpt", tf <- tempfile(), mode="wb")
+Low_Cholesterol_1 <- foreign::read.xport(tf)[,c("SEQN", "LBDLDLSI", "LBDTRSI")]
+names(Low_Cholesterol_1) <- c("SEQN", "low_density_cholesterol", "Triglyceride")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/ApoB_E.xpt", tf <- tempfile(), mode="wb")
+Apolipoprotein_1 <- foreign::read.xport(tf)[,c("SEQN", "LBDAPBSI")]
+names(Apolipoprotein_1) <- c("SEQN", "Apolipoprotein")
+
+data_frames_a <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(CRP_1, Glycohemoglobin_1, CDAI_1, wholeBA_1, blood_pre_1, glucose_1, Cholesterol_1, High_Cholesterol_1, Low_Cholesterol_1, Apolipoprotein_1))
+
+```
+
+
+```{r}
+#2009-2010 data cycle
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/CRP_F.xpt", tf <- tempfile(), mode="wb")
+CRP_2 <- foreign::read.xport(tf)[,c("SEQN", "LBXCRP")]
+names(CRP_2) <- c("SEQN", "CRP")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/GHB_F.xpt", tf <- tempfile(), mode="wb")
+Glycohemoglobin_2 <- foreign::read.xport(tf)[,c("SEQN", "LBXGH")]
+names(Glycohemoglobin_2) <- c("SEQN", "Glycohemoglobin")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/BIOPRO_F.xpt", tf <- tempfile(), mode="wb")
+wholeBA_2 <- foreign::read.xport(tf)[,c("SEQN", "LBDSCRSI", "LBDSCHSI","LBDSBUSI","LBXSAPSI", "LBDSALSI")]
+names(wholeBA_2) <- c("SEQN", "Creatinine", "Cholesterol", "Urea_nitrogen", "Alkaline_phosphotase", "Albumin")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/BPX_F.xpt", tf <- tempfile(), mode="wb")
+blood_pre_2 <- foreign::read.xport(tf)[,c("SEQN", "BPXSY3", "BPXDI3")]
+names(blood_pre_2) <- c("SEQN", "Systolic_blood_pre", "Diastolic_blood_pre")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/GLU_F.xpt", tf <- tempfile(), mode="wb")
+glucose_2 <- foreign::read.xport(tf)[,c("SEQN", "LBDGLUSI")]
+names(glucose_2) <- c("SEQN", "fasting_glucose")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/TCHOL_F.xpt", tf <- tempfile(), mode="wb")
+Cholesterol_2 <- foreign::read.xport(tf)[,c("SEQN", "LBDTCSI")]
+names(Cholesterol_2) <- c("SEQN", "Total_Cholesterol")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/HDL_F.xpt", tf <- tempfile(), mode="wb")
+High_Cholesterol_2 <- foreign::read.xport(tf)[,c("SEQN", "LBDHDDSI")]
+names(High_Cholesterol_2) <- c("SEQN", "high_density_cholesterol")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/TRIGLY_F.xpt", tf <- tempfile(), mode="wb")
+Low_Cholesterol_2 <- foreign::read.xport(tf)[,c("SEQN", "LBDLDLSI", "LBDTRSI")]
+names(Low_Cholesterol_2) <- c("SEQN", "low_density_cholesterol", "Triglyceride")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/ApoB_F.xpt", tf <- tempfile(), mode="wb")
+Apolipoprotein_2 <- foreign::read.xport(tf)[,c("SEQN", "LBDAPBSI")]
+names(Apolipoprotein_2) <- c("SEQN", "Apolipoprotein")
+
+data_frames_b <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(CRP_2, Glycohemoglobin_2, CDAI_2, wholeBA_2, blood_pre_2, glucose_2, Cholesterol_2, High_Cholesterol_2, Low_Cholesterol_2, Apolipoprotein_2))
+```
+
+
+
+```{r}
+#2015-2016 data cycle
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/HSCRP_I.xpt", tf <- tempfile(), mode="wb")
+CRP_5 <- foreign::read.xport(tf)[,c("SEQN", "LBXHSCRP")]
+names(CRP_5) <- c("SEQN", "CRP")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/GHB_I.xpt", tf <- tempfile(), mode="wb")
+Glycohemoglobin_5 <- foreign::read.xport(tf)[,c("SEQN", "LBXGH")]
+names(Glycohemoglobin_5) <- c("SEQN", "Glycohemoglobin")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/BIOPRO_I.xpt", tf <- tempfile(), mode="wb")
+wholeBA_5 <- foreign::read.xport(tf)[,c("SEQN", "LBDSCRSI", "LBDSCHSI","LBDSBUSI","LBXSAPSI", "LBDSALSI")]
+names(wholeBA_5) <- c("SEQN", "Creatinine", "Cholesterol", "Urea_nitrogen", "Alkaline_phosphotase", "Albumin")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/BPX_I.xpt", tf <- tempfile(), mode="wb")
+blood_pre_5 <- foreign::read.xport(tf)[,c("SEQN", "BPXSY3", "BPXDI3")]
+names(blood_pre_5) <- c("SEQN", "Systolic_blood_pre", "Diastolic_blood_pre")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/GLU_I.xpt", tf <- tempfile(), mode="wb")
+glucose_5 <- foreign::read.xport(tf)[,c("SEQN", "LBDGLUSI")]
+names(glucose_5) <- c("SEQN", "fasting_glucose")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/TCHOL_I.xpt", tf <- tempfile(), mode="wb")
+Cholesterol_5 <- foreign::read.xport(tf)[,c("SEQN", "LBDTCSI")]
+names(Cholesterol_5) <- c("SEQN", "Total_Cholesterol")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/HDL_I.xpt", tf <- tempfile(), mode="wb")
+High_Cholesterol_5 <- foreign::read.xport(tf)[,c("SEQN", "LBDHDDSI")]
+names(High_Cholesterol_5) <- c("SEQN", "high_density_cholesterol")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/TRIGLY_I.xpt", tf <- tempfile(), mode="wb")
+Low_Cholesterol_5 <- foreign::read.xport(tf)[,c("SEQN", "LBDLDLSI", "LBDTRSI")]
+names(Low_Cholesterol_5) <- c("SEQN", "low_density_cholesterol", "Triglyceride")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/APOB_I.xpt", tf <- tempfile(), mode="wb")
+Apolipoprotein_5 <- foreign::read.xport(tf)[,c("SEQN", "LBDAPBSI")]
+names(Apolipoprotein_5) <- c("SEQN", "Apolipoprotein")
+
+data_frames_c <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(CRP_5, Glycohemoglobin_5, CDAI_5, wholeBA_5, blood_pre_5, glucose_5, Cholesterol_5, High_Cholesterol_5, Low_Cholesterol_5, Apolipoprotein_5))
+```
+
+
+```{r}
+#2017-2020 data cycle
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_HSCRP.xpt", tf <- tempfile(), mode="wb")
+CRP_6 <- foreign::read.xport(tf)[,c("SEQN", "LBXHSCRP")]
+names(CRP_6) <- c("SEQN", "CRP")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_GHB.xpt", tf <- tempfile(), mode="wb")
+Glycohemoglobin_6 <- foreign::read.xport(tf)[,c("SEQN", "LBXGH")]
+names(Glycohemoglobin_6) <- c("SEQN", "Glycohemoglobin")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_BIOPRO.xpt", tf <- tempfile(), mode="wb")
+wholeBA_6 <- foreign::read.xport(tf)[,c("SEQN", "LBDSCRSI", "LBDSCHSI","LBDSBUSI","LBXSAPSI", "LBDSALSI")]
+names(wholeBA_6) <- c("SEQN", "Creatinine", "Cholesterol", "Urea_nitrogen", "Alkaline_phosphotase", "Albumin")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_BPXO.xpt", tf <- tempfile(), mode="wb")
+blood_pre_6 <- foreign::read.xport(tf)[,c("SEQN", "BPXOSY3", "BPXODI3")]
+names(blood_pre_6) <- c("SEQN", "Systolic_blood_pre", "Diastolic_blood_pre")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_GLU.xpt", tf <- tempfile(), mode="wb")
+glucose_6 <- foreign::read.xport(tf)[,c("SEQN", "LBDGLUSI")]
+names(glucose_6) <- c("SEQN", "fasting_glucose")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_TCHOL.xpt", tf <- tempfile(), mode="wb")
+Cholesterol_6 <- foreign::read.xport(tf)[,c("SEQN", "LBDTCSI")]
+names(Cholesterol_6) <- c("SEQN", "Total_Cholesterol")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_HDL.xpt", tf <- tempfile(), mode="wb")
+High_Cholesterol_6 <- foreign::read.xport(tf)[,c("SEQN", "LBDHDDSI")]
+names(High_Cholesterol_6) <- c("SEQN", "high_density_cholesterol")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_TRIGLY.xpt", tf <- tempfile(), mode="wb")
+Low_Cholesterol_6 <- foreign::read.xport(tf)[,c("SEQN", "LBDLDLSI", "LBDTRSI")]
+names(Low_Cholesterol_6) <- c("SEQN", "low_density_cholesterol", "Triglyceride")
+
+
+data_frames_d <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(CRP_6, Glycohemoglobin_6, CDAI_6, wholeBA_6, blood_pre_6, glucose_6, Cholesterol_6, High_Cholesterol_6, Low_Cholesterol_6))
+```
+
+#merge results
+```{r}
+BioAge_fall <- bind_rows(data_frames_a, data_frames_b, data_frames_c, data_frames_d)
+
+Falldat_Bio <- merge(Falldat, BioAge_fall, by = "SEQN", all.x = TRUE)
+
+Falldat_Bio <- Falldat_Bio %>%
+  filter(!is.na(CRP), !is.na(Creatinine), !is.na(Glycohemoglobin), !is.na(Cholesterol), !is.na(Urea_nitrogen),
+         !is.na(Alkaline_phosphotase), !is.na(Systolic_blood_pre), !is.na(Albumin))
+
+#we included 13,479 people
+```
+
+
+
+
+```{r}
+# calculate BioAge
+# Define a function to calculate biological age for each individual
+calculate_bio_age <- function(biomarker_values, coefficients, intercepts, variances) {
+  # Calculate the numerator
+  numerator <- sum((biomarker_values - intercepts) * (coefficients / variances))
+  
+  # Calculate the denominator
+  denominator <- sum((coefficients / sqrt(variances))^2)
+  
+  # Calculate the biological age
+  bio_age <- numerator / denominator
+  
+  return(bio_age)
+}
+
+# Initialize vectors to store the biological ages
+biological_ages <- numeric(nrow(Falldat_Bio))
+
+# Loop through each row (individual) in the Falldat_Bio data frame
+for (i in 1:nrow(Falldat_Bio)) {
+  # Extract biomarker values for the individual
+  biomarker_values <- c(Falldat_Bio[i, "CRP"], Falldat_Bio[i, "Creatinine"], Falldat_Bio[i, "Glycohemoglobin"],
+                        Falldat_Bio[i, "Cholesterol"], Falldat_Bio[i, "Urea_nitrogen"], Falldat_Bio[i, "Alkaline_phosphotase"],
+                        Falldat_Bio[i, "Systolic_blood_pre"], Falldat_Bio[i, "Albumin"])
+  
+  # Coefficients, intercepts, and variances (you need to replace these with your actual values)
+  coefficients <- c(1, 1, 1, 1, 1, 1, 1, 1)  # Coefficients from your regression models
+  intercepts <- rep(0, 8)  # Intercept values from your regression models
+  variances <- rep(1, 8)  # Variance values from your regression models
+  
+  # Calculate biological age for the individual
+  biological_ages[i] <- calculate_bio_age(biomarker_values, coefficients, intercepts, variances)
+}
+
+# Add the calculated biological ages to the Falldat_Bio data frame
+Falldat_Bio$biological_age <- biological_ages
+
+# Print the first few rows of the data frame with the added biological age column
+head(Falldat_Bio)
+```
+
+
+
+
+```{r}
+# svy design
+des <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = Falldat_Bio)#adjust weight before modelling
+
+
+
+#model 1 -- non-adjusted
+model_13 <- svyglm(biological_age ~ categorize_MET, data = Falldat_Bio, design = des, family = "gaussian") 
+summary(model_13)
+
+#model 2 -- adjusted for chronological_age, Gender, Race, CDAI, Marital_Status and family Ratio_income_poverty.
+model_14 <- svyglm(biological_age ~ categorize_MET + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                  , data = Falldat_Bio, design = des, family = "gaussian") 
+
+summary(model_14)
+
+vif_model_14 <- vif(model_14)
+print(vif_model_14)
+
+#model 3 -- adjusted for BMI + sleep_disorders + Smoked_days + Avg_alcohol_drinks + had_cancer.
+model_15 <- svyglm(biological_age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                  , data = Falldat_Bio, design = des, family = "gaussian") 
+summary(model_15)
+
+vif_model_15 <- vif(model_15)
+print(vif_model_15)
+
+#effect modifier 1 - MET
+model_K <- svyglm(biological_age ~ Total_MET + as.factor(categorize_MET) + Total_MET*as.factor(categorize_MET), data = Falldat_Bio, design = des, family = "gaussian")
+summary(model_K)
+```
+
+
+
+
+
+```{r}
+model_16 <- svyglm(biological_age ~ categorize_PA, data = Falldat_Bio, design = des, family = "gaussian") 
+summary(model_16)
+
+#model 2 -- adjusted for chronological_age, Gender, Race, CDAI, Marital_Status and family Ratio_income_poverty.
+model_17 <- svyglm(biological_age ~ categorize_PA + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                  , data = Falldat_Bio, design = des, family = "gaussian") 
+
+summary(model_17)
+
+vif_model_17 <- vif(model_17)
+print(vif_model_17)
+
+#model 3 -- adjusted for BMI + sleep_disorders + Smoked_days + Avg_alcohol_drinks + had_cancer.
+model_18 <- svyglm(biological_age ~ categorize_PA + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                  , data = Falldat_Bio, design = des, family = "gaussian") 
+summary(model_18)
+
+vif_model_18 <- vif(model_18)
+print(vif_model_18)
+
+#effect modifier 1 - MET
+model_N <- svyglm(biological_age ~ Total_MET + as.factor(categorize_PA) + Total_MET*as.factor(categorize_PA), data = Falldat_Bio, design = des, family = "gaussian")
+summary(model_N)
+```
+
+
+
+
+```{r}
+non_model_11 <- svyglm(biological_age ~ rcs(Total_MET, 3),
+                        data = Falldat_Bio, design = des, family = "gaussian")
+
+non_model_12 <- svyglm(biological_age ~ rcs(Total_MET, 4),
+                        data = Falldat_Bio, design = des, family = "gaussian")
+
+non_model_13 <- svyglm(biological_age ~ rcs(Total_MET, 5),
+                        data = Falldat_Bio, design = des, family = "gaussian")
+
+non_model_14 <- svyglm(biological_age ~ rcs(Total_MET, 6),
+                        data = Falldat_Bio, design = des, family = "gaussian")
+
+non_model_15 <- svyglm(biological_age ~ rcs(Total_MET, 7),
+                        data = Falldat_Bio, design = des, family = "gaussian")
+
+AIC(non_model_11, non_model_12, non_model_13, non_model_14, non_model_15)
+
+summary(non_model_14)
+```
+
+
+
+```{r}
+# Predict Phenotypic Age using non_model_13
+pr3 <- predict(non_model_14, type = "response")
+
+# Fit a linear regression model with a restricted cubic spline of Total_MET
+model.spline.2 <- lm(pr3 ~ rcs(Falldat_Bio$Total_MET))
+
+
+knot.1 <- rcs(Falldat_Bio$Total_MET, n=5)
+
+summary(model.spline.2)
+
+anova(model.spline.2)
+```
+
+
+
+
+```{r}
+ggplot(Falldat_Bio, aes(Total_MET, biological_age)) +
+  stat_smooth(method = lm, formula = y ~ rcs(x,6)) +
+  theme_bw() +
+  theme(panel.grid.major =
+  element_blank(), panel.grid.minor = element_blank()) +
+    xlab("Total_MET") +
+    ylab("biological_age") +
+    ggtitle("RCS")
+```
+
+
+
+
+```{r}
+# Calculate the quantiles of Total_MET
+quantiles <- quantile(Falldat_Bio$Total_MET, c(0.05, 0.23, 0.41, 0.59, 0.77, 0.95))
+
+# Create the plot with the RCS smooth
+ggplot(Falldat_Bio, aes(Total_MET, biological_age)) +
+  stat_smooth(method = lm, formula = y ~ rcs(x, 6)) +
+  
+  # Add vertical dashed lines at the quantiles
+  geom_vline(xintercept = quantiles, linetype = "dashed", color = "red") +
+  
+  # Theme settings
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  
+  # Labels and title
+  xlab("Total MET") +
+  ylab("Klotho") +
+  ggtitle("RCS")
+```
+
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+

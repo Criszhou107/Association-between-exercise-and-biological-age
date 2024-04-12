@@ -1,0 +1,484 @@
+#To investigate the association between physical exercise and aging
+#Assumption: physical exercise intensity is positively associated with slowing aging
+#Database: NHANES
+#Code: March 21, 2024
+
+
+#library packages
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+library("haven")
+library("tidyverse")
+library("dplyr")
+library("foreign")
+library("survey")
+library("ggplot2")
+library("car")
+library("rms")
+```
+
+#Extract NHANES data from 2007 to 2020
+#Calculation of Physical Activity (PA) and demographic from 2007-2020
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+## 2007-2008 dataset
+#Demographic data
+download.file("https://wwwn.cdc.gov/Nchs/Nhanes/2007-2008/DEMO_E.xpt", tf <- tempfile(), mode="wb") 
+Demographic_1 <- foreign::read.xport(tf)[,c("SEQN", "RIDAGEYR", "RIAGENDR", "RIDRETH1", "RIDEXPRG", "DMDMARTL", "INDFMPIR", "WTINT2YR", "WTMEC2YR", "SDMVPSU", "SDMVSTRA")]
+names(Demographic_1) <- c("SEQN", "chronological_age", "Gender", "Race", "Pregnancy", "Marital_Status", "Ratio_income_poverty", "Interview_Weight", "MEC_Weight", "psu", "Strata")
+
+#BMI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/BMX_E.xpt", tf <- tempfile(), mode="wb") 
+BMI_1 <- foreign::read.xport(tf)[,c("SEQN", "BMXBMI")]
+names(BMI_1) <- c("SEQN", "BMI")
+
+#CDAI first day
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/DR1TOT_E.xpt", tf <- tempfile(), mode="wb") 
+CDAI_1 <- foreign::read.xport(tf)[,c("SEQN", "DR1TVARA", "DR1TVC", "DR1TATOA", "DR1TZINC", "DR1TSELE")]
+names(CDAI_1) <- c("SEQN", "Vitamin_A", "Vitamin_C", "Vitamin_E", "Zinc", "Selenium")
+
+#Sleep Disorders
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/SLQ_E.xpt", tf <- tempfile(), mode="wb") 
+Sleep_1 <- foreign::read.xport(tf)[,c("SEQN", "SLQ050")]
+names(Sleep_1) <- c("SEQN", "sleep_disorders")
+
+#smoking
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/SMQ_E.xpt", tf <- tempfile(), mode="wb") 
+smooking_1 <- foreign::read.xport(tf)[,c("SEQN", "SMQ020", "SMQ040", "SMQ050Q")]
+names(smooking_1) <- c("SEQN", "Smoked_days", "now_smoke", "quit_smoking")
+
+#alcohol use
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/ALQ_E.xpt", tf <- tempfile(), mode="wb") 
+alcohol_1 <- foreign::read.xport(tf)[,c("SEQN", "ALQ130")]
+names(alcohol_1) <- c("SEQN", "Avg_alcohol_drinks")
+
+#Physical Functioning
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/PFQ_E.xpt", tf <- tempfile(), mode="wb") 
+hard_activities_1 <- foreign::read.xport(tf)[,c("SEQN", "PFQ054", "PFQ061C")]
+names(hard_activities_1) <- c("SEQN", "equipment_walk", "walk_difficulty")
+
+#medical conditions
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/MCQ_E.xpt", tf <- tempfile(), mode="wb") 
+medical_conditions_1 <- foreign::read.xport(tf)[,c("SEQN", "MCQ220")]
+names(medical_conditions_1) <- c("SEQN", "had_cancer")
+
+# Merge
+# List of data frames to merge
+#data_frames_1 <- list(Demographic_1, BMI_1, CDAI_1, Sleep_1, smooking_1, alcohol_1, hard_activities_1, medical_conditions_1)
+data_frames_1 <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(Demographic_1, BMI_1, CDAI_1, Sleep_1, smooking_1, alcohol_1, hard_activities_1, medical_conditions_1))
+
+```
+
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+## 2009-2010 dataset
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/DEMO_F.xpt", tf <- tempfile(), mode="wb")
+Demographic_2 <- foreign::read.xport(tf)[,c("SEQN", "RIDAGEYR", "RIAGENDR", "RIDRETH1", "RIDEXPRG", "DMDMARTL", "INDFMPIR", "WTINT2YR", "WTMEC2YR", "SDMVPSU", "SDMVSTRA")]
+names(Demographic_2) <- c("SEQN", "chronological_age", "Gender", "Race", "Pregnancy", "Marital_Status", "Ratio_income_poverty", "Interview_Weight", "MEC_Weight", "psu", "Strata")
+
+#BMI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/BMX_F.xpt", tf <- tempfile(), mode="wb") 
+BMI_2 <- foreign::read.xport(tf)[,c("SEQN", "BMXBMI")]
+names(BMI_2) <- c("SEQN", "BMI")
+
+#CDAI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/DR1TOT_F.xpt", tf <- tempfile(), mode="wb") 
+CDAI_2 <- foreign::read.xport(tf)[,c("SEQN", "DR1TVARA", "DR1TVC", "DR1TATOA", "DR1TZINC", "DR1TSELE")]
+names(CDAI_2) <- c("SEQN", "Vitamin_A", "Vitamin_C", "Vitamin_E", "Zinc", "Selenium")
+
+#Sleep Disorders
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/SLQ_F.xpt", tf <- tempfile(), mode="wb") 
+Sleep_2 <- foreign::read.xport(tf)[,c("SEQN", "SLQ050")]
+names(Sleep_2) <- c("SEQN", "sleep_disorders")
+
+#smoking
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/SMQ_F.xpt", tf <- tempfile(), mode="wb") 
+smooking_2 <- foreign::read.xport(tf)[,c("SEQN", "SMQ020", "SMQ040", "SMQ050Q")]
+names(smooking_2) <- c("SEQN", "Smoked_days", "now_smoke", "quit_smoking")
+
+#alcohol use
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/ALQ_F.xpt", tf <- tempfile(), mode="wb") 
+alcohol_2 <- foreign::read.xport(tf)[,c("SEQN", "ALQ130")]
+names(alcohol_2) <- c("SEQN", "Avg_alcohol_drinks")
+
+#Physical Functioning
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/PFQ_F.xpt", tf <- tempfile(), mode="wb") 
+hard_activities_2 <- foreign::read.xport(tf)[,c("SEQN", "PFQ054", "PFQ061C")]
+names(hard_activities_2) <- c("SEQN", "equipment_walk", "walk_difficulty")
+
+#medical conditions
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/MCQ_F.xpt", tf <- tempfile(), mode="wb") 
+medical_conditions_2 <- foreign::read.xport(tf)[,c("SEQN", "MCQ220")]
+names(medical_conditions_2) <- c("SEQN", "had_cancer")
+
+# Merge Demographic_2
+# List of data frames to merge
+#data_frames_2 <- list(Demographic_2, BMI_2, Sleep_2, CDAI_2, smooking_2, alcohol_2, hard_activities_2, medical_conditions_2)
+data_frames_2 <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(Demographic_2, BMI_2, CDAI_2, Sleep_2, smooking_2, alcohol_2, hard_activities_2, medical_conditions_2))
+```
+
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+# 2011-2012 dataset
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/DEMO_G.xpt", tf <- tempfile(), mode="wb")
+Demographic_3 <- foreign::read.xport(tf)[,c("SEQN", "RIDAGEYR", "RIAGENDR", "RIDRETH1", "RIDEXPRG", "DMDMARTL", "INDFMPIR", "WTINT2YR", "WTMEC2YR", "SDMVPSU", "SDMVSTRA")]
+names(Demographic_3) <- c("SEQN", "chronological_age", "Gender", "Race", "Pregnancy", "Marital_Status", "Ratio_income_poverty", "Interview_Weight", "MEC_Weight", "psu", "Strata")
+
+#BMI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/BMX_G.xpt", tf <- tempfile(), mode="wb") 
+BMI_3 <- foreign::read.xport(tf)[,c("SEQN", "BMXBMI")]
+names(BMI_3) <- c("SEQN", "BMI")
+
+#CDAI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/DR1TOT_G.xpt", tf <- tempfile(), mode="wb") 
+CDAI_3 <- foreign::read.xport(tf)[,c("SEQN", "DR1TVARA", "DR1TVC", "DR1TATOA", "DR1TZINC", "DR1TSELE")]
+names(CDAI_3) <- c("SEQN", "Vitamin_A", "Vitamin_C", "Vitamin_E", "Zinc", "Selenium")
+
+#Sleep Disorders
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/SLQ_G.xpt", tf <- tempfile(), mode="wb") 
+Sleep_3 <- foreign::read.xport(tf)[,c("SEQN", "SLQ050")]
+names(Sleep_3) <- c("SEQN", "sleep_disorders")
+
+#smoking
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/SMQ_G.xpt", tf <- tempfile(), mode="wb") 
+smooking_3 <- foreign::read.xport(tf)[,c("SEQN", "SMQ020", "SMQ040", "SMQ050Q")]
+names(smooking_3) <- c("SEQN", "Smoked_days", "now_smoke", "quit_smoking")
+
+#alcohol use
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/ALQ_G.xpt", tf <- tempfile(), mode="wb") 
+alcohol_3 <- foreign::read.xport(tf)[,c("SEQN", "ALQ130")]
+names(alcohol_3) <- c("SEQN", "Avg_alcohol_drinks")
+
+#Physical Functioning
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/PFQ_G.xpt", tf <- tempfile(), mode="wb") 
+hard_activities_3 <- foreign::read.xport(tf)[,c("SEQN", "PFQ054", "PFQ061C")]
+names(hard_activities_3) <- c("SEQN", "equipment_walk", "walk_difficulty")
+
+#medical conditions
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/MCQ_G.xpt", tf <- tempfile(), mode="wb") 
+medical_conditions_3 <- foreign::read.xport(tf)[,c("SEQN", "MCQ220")]
+names(medical_conditions_3) <- c("SEQN", "had_cancer")
+
+
+# Merge Demographic_3 with PA_c
+#data_frames_3 <- list(Demographic_3, BMI_3, CDAI_3, Sleep_3, smooking_3, alcohol_3, hard_activities_3, medical_conditions_3)
+data_frames_3 <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(Demographic_3, BMI_3, CDAI_3, Sleep_3, smooking_3, alcohol_3, hard_activities_3, medical_conditions_3))
+
+```
+
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+# 2013-2014 Dataset
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/DEMO_H.xpt", tf <- tempfile(), mode="wb")
+Demographic_4 <- foreign::read.xport(tf)[,c("SEQN", "RIDAGEYR", "RIAGENDR", "RIDRETH1", "RIDEXPRG", "DMDMARTL", "INDFMPIR", "WTINT2YR", "WTMEC2YR", "SDMVPSU", "SDMVSTRA")]
+names(Demographic_4) <- c("SEQN", "chronological_age", "Gender", "Race", "Pregnancy", "Marital_Status", "Ratio_income_poverty", "Interview_Weight", "MEC_Weight", "psu", "Strata")
+
+#BMI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/BMX_H.xpt", tf <- tempfile(), mode="wb") 
+BMI_4 <- foreign::read.xport(tf)[,c("SEQN", "BMXBMI")]
+names(BMI_4) <- c("SEQN", "BMI")
+
+#CDAI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/DR1TOT_H.xpt", tf <- tempfile(), mode="wb") 
+CDAI_4 <- foreign::read.xport(tf)[,c("SEQN", "DR1TVARA", "DR1TVC", "DR1TATOA", "DR1TZINC", "DR1TSELE")]
+names(CDAI_4) <- c("SEQN", "Vitamin_A", "Vitamin_C", "Vitamin_E", "Zinc", "Selenium")
+
+#Sleep Disorders
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/SLQ_H.xpt", tf <- tempfile(), mode="wb") 
+Sleep_4 <- foreign::read.xport(tf)[,c("SEQN", "SLQ050")]
+names(Sleep_4) <- c("SEQN", "sleep_disorders")
+
+#smoking
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/SMQ_H.xpt", tf <- tempfile(), mode="wb") 
+smooking_4 <- foreign::read.xport(tf)[,c("SEQN", "SMQ020", "SMQ040", "SMQ050Q")]
+names(smooking_4) <- c("SEQN", "Smoked_days", "now_smoke", "quit_smoking")
+
+#alcohol use
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/ALQ_H.xpt", tf <- tempfile(), mode="wb") 
+alcohol_4 <- foreign::read.xport(tf)[,c("SEQN", "ALQ130")]
+names(alcohol_4) <- c("SEQN", "Avg_alcohol_drinks")
+
+#Physical Functioning
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/PFQ_H.xpt", tf <- tempfile(), mode="wb") 
+hard_activities_4 <- foreign::read.xport(tf)[,c("SEQN", "PFQ054", "PFQ061C")]
+names(hard_activities_4) <- c("SEQN", "equipment_walk", "walk_difficulty")
+
+#medical conditions
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/MCQ_H.xpt", tf <- tempfile(), mode="wb") 
+medical_conditions_4 <- foreign::read.xport(tf)[,c("SEQN", "MCQ220")]
+names(medical_conditions_4) <- c("SEQN", "had_cancer")
+
+# Merge Demographic_4
+#data_frames_4 <- list(Demographic_4, BMI_4, CDAI_4, Sleep_4, smooking_4, alcohol_4, hard_activities_4, medical_conditions_4)
+data_frames_4 <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(Demographic_4, BMI_4, CDAI_4, Sleep_4, smooking_4, alcohol_4, hard_activities_4, medical_conditions_4))
+```
+
+
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+# 2015-2016 Dataset
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/DEMO_I.xpt", tf <- tempfile(), mode="wb")
+Demographic_5 <- foreign::read.xport(tf)[,c("SEQN", "RIDAGEYR", "RIAGENDR", "RIDRETH1", "RIDEXPRG", "DMDMARTL", "INDFMPIR", "WTINT2YR", "WTMEC2YR", "SDMVPSU", "SDMVSTRA")]
+names(Demographic_5) <- c("SEQN", "chronological_age", "Gender", "Race", "Pregnancy", "Marital_Status", "Ratio_income_poverty", "Interview_Weight", "MEC_Weight", "psu", "Strata")
+
+#BMI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/BMX_I.xpt", tf <- tempfile(), mode="wb") 
+BMI_5 <- foreign::read.xport(tf)[,c("SEQN", "BMXBMI")]
+names(BMI_5) <- c("SEQN", "BMI")
+
+#CDAI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/DR1TOT_I.xpt", tf <- tempfile(), mode="wb") 
+CDAI_5 <- foreign::read.xport(tf)[,c("SEQN", "DR1TVARA", "DR1TVC", "DR1TATOA", "DR1TZINC", "DR1TSELE")]
+names(CDAI_5) <- c("SEQN", "Vitamin_A", "Vitamin_C", "Vitamin_E", "Zinc", "Selenium")
+
+#Sleep Disorders
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/SLQ_I.xpt", tf <- tempfile(), mode="wb") 
+Sleep_5 <- foreign::read.xport(tf)[,c("SEQN", "SLQ050")]
+names(Sleep_5) <- c("SEQN", "sleep_disorders")
+
+#smoking
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/SMQ_I.xpt", tf <- tempfile(), mode="wb") 
+smooking_5 <- foreign::read.xport(tf)[,c("SEQN", "SMQ020", "SMQ040", "SMQ050Q")]
+names(smooking_5) <- c("SEQN", "Smoked_days", "now_smoke", "quit_smoking")
+
+#alcohol use
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/ALQ_I.xpt", tf <- tempfile(), mode="wb") 
+alcohol_5 <- foreign::read.xport(tf)[,c("SEQN", "ALQ130")]
+names(alcohol_5) <- c("SEQN", "Avg_alcohol_drinks")
+
+#Physical Functioning
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/PFQ_I.xpt", tf <- tempfile(), mode="wb") 
+hard_activities_5 <- foreign::read.xport(tf)[,c("SEQN", "PFQ054", "PFQ061C")]
+names(hard_activities_5) <- c("SEQN", "equipment_walk", "walk_difficulty")
+
+#medical conditions
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/MCQ_I.xpt", tf <- tempfile(), mode="wb") 
+medical_conditions_5 <- foreign::read.xport(tf)[,c("SEQN", "MCQ220")]
+names(medical_conditions_5) <- c("SEQN", "had_cancer")
+
+# Merge Demographic_5
+# data_frames_5 <- list(Demographic_5, BMI_5, CDAI_5, Sleep_5, smooking_5, alcohol_5, hard_activities_5, medical_conditions_5)
+data_frames_5 <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(Demographic_5, BMI_5, CDAI_5, Sleep_5, smooking_5, alcohol_5, hard_activities_5, medical_conditions_5))
+
+# merging datasets 2007, 2009, 2011, 2013, 2015, 2017
+before_2017 <- bind_rows(data_frames_1, data_frames_2, data_frames_3, data_frames_4, data_frames_5)
+
+# 13.2-year weight, see https://stacks.cdc.gov/view/cdc/115434
+before_2017$weight_2 = 2/13.2*before_2017$MEC_Weight
+
+#We included 50,588 people before 2017
+
+#exclude data step 1:
+#Exclude variance of hard activities
+before_2017$equipment_walk[is.na(before_2017$equipment_walk)] <- 0
+before_2017$walk_difficulty[is.na(before_2017$walk_difficulty)] <- 0
+
+before_2017 <- before_2017[before_2017$equipment_walk != 1, ]
+before_2017 <- before_2017[before_2017$walk_difficulty != 3, ]
+before_2017 <- before_2017[before_2017$walk_difficulty != 4, ]
+before_2017 <- before_2017[before_2017$walk_difficulty != 5, ]
+#Then we included 47,042 people
+
+#Filtered variables
+before_2017 <- select(before_2017, -equipment_walk, -walk_difficulty)
+```
+
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+# 2017-2020 data
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_DEMO.xpt", tf <- tempfile(), mode="wb")
+Demographic_6 <- foreign::read.xport(tf)[,c("SEQN", "RIDAGEYR", "RIAGENDR", "RIDRETH1", "RIDEXPRG", "DMDMARTZ", "INDFMPIR", "WTINTPRP", "WTMECPRP", "SDMVPSU", "SDMVSTRA")]
+names(Demographic_6) <- c("SEQN", "chronological_age", "Gender", "Race", "Pregnancy", "Marital_Status", "Ratio_income_poverty", "Interview_Weight", "MEC_Weight", "psu", "Strata")
+
+
+#BMI
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_BMX.xpt", tf <- tempfile(), mode="wb") 
+BMI_6 <- foreign::read.xport(tf)[,c("SEQN", "BMXBMI")]
+names(BMI_6) <- c("SEQN", "BMI")
+
+#CDAI day 1
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/DR1TOT_J.xpt", tf <- tempfile(), mode="wb") 
+CDAI_6 <- foreign::read.xport(tf)[,c("SEQN", "DR1TVARA", "DR1TVC", "DR1TATOA", "DR1TZINC", "DR1TSELE")]
+names(CDAI_6) <- c("SEQN", "Vitamin_A", "Vitamin_C", "Vitamin_E", "Zinc", "Selenium")
+
+#Sleep Disorders
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_SLQ.xpt", tf <- tempfile(), mode="wb") 
+Sleep_6 <- foreign::read.xport(tf)[,c("SEQN", "SLQ050")]
+names(Sleep_6) <- c("SEQN", "sleep_disorders")
+
+#smoking
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_SMQ.xpt", tf <- tempfile(), mode="wb") 
+smooking_6 <- foreign::read.xport(tf)[,c("SEQN", "SMQ020", "SMQ040", "SMQ050Q")]
+names(smooking_6) <- c("SEQN", "Smoked_days", "now_smoke", "quit_smoking")
+
+#alcohol use
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_ALQ.xpt", tf <- tempfile(), mode="wb") 
+alcohol_6 <- foreign::read.xport(tf)[,c("SEQN", "ALQ130")]
+names(alcohol_6) <- c("SEQN", "Avg_alcohol_drinks")
+
+#medical conditions
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_MCQ.xpt", tf <- tempfile(), mode="wb") 
+medical_conditions_6 <- foreign::read.xport(tf)[,c("SEQN", "MCQ220")]
+names(medical_conditions_6) <- c("SEQN", "had_cancer")
+
+
+# Merge Demographic_6 with PA_f
+#data_frames_6 <- bind_rows(Demographic_6, BMI_6, CDAI_6, Sleep_6, smooking_6, alcohol_6, medical_conditions_6)
+data_frames_6 <- Reduce(function(x, y) merge(x, y, by = "SEQN", all.x = TRUE), 
+                        list(Demographic_6, BMI_6, CDAI_6, Sleep_6, smooking_6, alcohol_6, medical_conditions_6))
+
+#MEC Weight
+data_frames_6$weight_2 = 3.2/13.2*data_frames_6$MEC_Weight
+
+demo_fall <- bind_rows(before_2017, data_frames_6)
+
+#we included 62,602 people from 2007-2020
+
+```
+
+#filter patients
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+
+# exclude data step 2:
+demo_fall <- demo_fall %>%
+  filter(chronological_age > 18) 
+# excluded age > 18, now we included 35,880 people
+
+# exclude data step 3:
+demo_fall$Pregnancy[is.na(demo_fall$Pregnancy)] <- 0
+
+demo_fall <- demo_fall[demo_fall$Pregnancy != 1, ]
+
+#excluded people who pregnancy. Got 35,479
+
+```
+
+#add PA
+```{r}
+#2007-2008
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/PAQ_E.xpt", tf <- tempfile(), mode="wb")
+PA_a <- foreign::read.xport(tf)[,c("SEQN", "PAQ610","PAD615","PAQ625","PAD630","PAQ640","PAD645","PAQ655","PAD660","PAQ670","PAD675")]
+names(PA_a) <- c("SEQN","Days_vigorous_work","Minutes_vigorous_work","Days_moderate_work","Minutes_moderate_work","Days_walk_or_bicycle","Minutes_walk_bicycle","Days_vigorous_recreational","Minutes_vigorous_recreational","Days_moderate_recreational","Minutes_moderate_recreational")
+```
+
+```{r}
+#2009-2010
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/PAQ_F.xpt", tf <- tempfile(), mode="wb")
+PA_b <- foreign::read.xport(tf)[,c("SEQN", "PAQ610","PAD615","PAQ625","PAD630","PAQ640","PAD645","PAQ655","PAD660","PAQ670","PAD675")]
+names(PA_b) <- c("SEQN","Days_vigorous_work","Minutes_vigorous_work","Days_moderate_work","Minutes_moderate_work","Days_walk_or_bicycle","Minutes_walk_bicycle","Days_vigorous_recreational","Minutes_vigorous_recreational","Days_moderate_recreational","Minutes_moderate_recreational")
+```            
+
+```{r}
+#2011-2012
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/PAQ_G.xpt", tf <- tempfile(), mode="wb")
+PA_c <- foreign::read.xport(tf)[,c("SEQN", "PAQ610","PAD615","PAQ625","PAD630","PAQ640","PAD645","PAQ655","PAD660","PAQ670","PAD675")]
+names(PA_c) <- c("SEQN","Days_vigorous_work","Minutes_vigorous_work","Days_moderate_work","Minutes_moderate_work","Days_walk_or_bicycle","Minutes_walk_bicycle","Days_vigorous_recreational","Minutes_vigorous_recreational","Days_moderate_recreational","Minutes_moderate_recreational")
+```
+
+```{r}
+#2013-2014
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/PAQ_H.xpt", tf <- tempfile(), mode="wb")
+PA_d <- foreign::read.xport(tf)[,c("SEQN", "PAQ610","PAD615","PAQ625","PAD630","PAQ640","PAD645","PAQ655","PAD660","PAQ670","PAD675")]
+names(PA_d) <- c("SEQN","Days_vigorous_work","Minutes_vigorous_work","Days_moderate_work","Minutes_moderate_work","Days_walk_or_bicycle","Minutes_walk_bicycle","Days_vigorous_recreational","Minutes_vigorous_recreational","Days_moderate_recreational","Minutes_moderate_recreational")
+```
+
+```{r}
+#2015-2016
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/PAQ_I.xpt", tf <- tempfile(), mode="wb")
+PA_e <- foreign::read.xport(tf)[,c("SEQN", "PAQ610","PAD615","PAQ625","PAD630","PAQ640","PAD645","PAQ655","PAD660","PAQ670","PAD675")]
+names(PA_e) <- c("SEQN","Days_vigorous_work","Minutes_vigorous_work","Days_moderate_work","Minutes_moderate_work","Days_walk_or_bicycle","Minutes_walk_bicycle","Days_vigorous_recreational","Minutes_vigorous_recreational","Days_moderate_recreational","Minutes_moderate_recreation")
+```
+
+```{r}
+#2017-2020
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_PAQ.xpt", tf <- tempfile(), mode="wb")
+PA_f <- foreign::read.xport(tf)[,c("SEQN", "PAQ610","PAD615","PAQ625","PAD630","PAQ640","PAD645","PAQ655","PAD660","PAQ670","PAD675")]
+names(PA_f) <- c("SEQN","Days_vigorous_work","Minutes_vigorous_work","Days_moderate_work","Minutes_moderate_work","Days_walk_or_bicycle","Minutes_walk_bicycle","Days_vigorous_recreational","Minutes_vigorous_recreational","Days_moderate_recreational","Minutes_moderate_recreation")
+
+```
+
+#merge PA and demo
+```{r}
+PA <- bind_rows(PA_a, PA_b, PA_c, PA_d, PA_e, PA_f)
+
+Falldat <- merge(demo_fall, PA, by = "SEQN", all.x = TRUE)
+
+#calculate CADI
+Falldat$Vitamin_A[is.na(Falldat$Vitamin_A)] <- 0
+Falldat$Vitamin_C[is.na(Falldat$Vitamin_C)] <- 0
+Falldat$Vitamin_E[is.na(Falldat$Vitamin_E)] <- 0
+Falldat$Zinc[is.na(Falldat$Zinc)] <- 0
+Falldat$Selenium[is.na(Falldat$Selenium)] <- 0
+
+# Calculate mean and standard deviation for each antioxidant
+mean_values <- sapply(Falldat[, c("Vitamin_A", "Vitamin_C", "Vitamin_E", "Zinc", "Selenium")], mean)
+sd_values <- sapply(Falldat[, c("Vitamin_A", "Vitamin_C", "Vitamin_E", "Zinc", "Selenium")], sd)
+
+# Calculate standardized intake values for each individual for each antioxidant
+std_values <- scale(Falldat[, c("Vitamin_A", "Vitamin_C", "Vitamin_E", "Zinc", "Selenium")])
+
+# Calculate CDAI for each individual
+Falldat$CDAI <- rowSums(std_values)
+
+```
+
+#filter non-exercise
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+# exclude data step 4: no exercise data
+# calculate the MET
+Falldat$Days_vigorous_work[is.na(Falldat$Days_vigorous_work)] <- 0
+Falldat$Minutes_vigorous_work[is.na(Falldat$Minutes_vigorous_work)] <- 0
+Falldat$Days_moderate_work[is.na(Falldat$Days_moderate_work)] <- 0
+Falldat$Minutes_moderate_work[is.na(Falldat$Minutes_moderate_work)] <- 0
+Falldat$Days_walk_or_bicycle[is.na(Falldat$Days_walk_or_bicycle)] <- 0
+Falldat$Minutes_walk_bicycle[is.na(Falldat$Minutes_walk_bicycle)] <- 0
+Falldat$Days_vigorous_recreational[is.na(Falldat$Days_vigorous_recreational)] <- 0
+Falldat$Minutes_vigorous_recreational[is.na(Falldat$Minutes_vigorous_recreational)] <- 0
+Falldat$Days_moderate_recreational[is.na(Falldat$Days_moderate_recreational)] <- 0
+Falldat$Minutes_moderate_recreational[is.na(Falldat$Minutes_moderate_recreational)] <- 0
+
+
+Falldat$Total_MET <- Falldat$Days_vigorous_work * Falldat$Minutes_vigorous_work +
+  Falldat$Days_moderate_work * Falldat$Minutes_moderate_work +
+  Falldat$Days_walk_or_bicycle * Falldat$Minutes_walk_bicycle +
+  Falldat$Days_vigorous_recreational * Falldat$Minutes_vigorous_recreational +
+  Falldat$Days_moderate_recreational * Falldat$Minutes_moderate_recreational
+
+Falldat <- Falldat[Falldat$Total_MET != 0, ]
+# we excluded Missing data of MET(MET = 0)
+# we got 25,736 people
+
+# Calculate the quartiles
+f <- quantile(Falldat$Total_MET, probs = c(0.25, 0.75), na.rm = TRUE)
+
+# Calculate the interquartile range (IQR)
+iqr <- f[2] - f[1]
+
+# Set the upper and lower bounds for outliers
+upper_bound_2 <- f[2] + 1.5 * iqr
+lower_bound_2 <- f[1] - 1.5 * iqr
+
+# Create a data frame for outliers
+
+Falldat <- subset(Falldat, Total_MET >= lower_bound_2 & Total_MET <= upper_bound_2)
+# we finally included 23,739 people.
+
+Falldat$categorize_MET <- ifelse(Falldat$Total_MET < 600, "1", "2")
+
+#exclude non-recreational exercise (step 5)
+Falldat$Minutes_vigorous_recreational[is.na(Falldat$Minutes_vigorous_recreational)] <- 0
+Falldat$Minutes_moderate_recreational[is.na(Falldat$Minutes_moderate_recreational)] <- 0
+
+Falldat <- Falldat[Falldat$Minutes_vigorous_recreational != 1, ]
+Falldat <- Falldat[Falldat$Minutes_moderate_recreational != 1, ]
+
+#23,739
+
+#activity category
+Falldat$categorize_PA <- ifelse(Falldat$Minutes_vigorous_recreational > 75 | Falldat$Minutes_moderate_recreational > 150, "1", "0")
+```
+
+

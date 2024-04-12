@@ -1,0 +1,685 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+
+```
+
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+#2007-2008
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/CBC_E.xpt", tf <- tempfile(), mode="wb")
+BloodCount_1 <- foreign::read.xport(tf)[,c("SEQN", "LBXWBCSI", "LBXLYPCT","LBXRDW", "LBXMCVSI")]
+names(BloodCount_1) <- c("SEQN", "White_blood_cell_count", "Lymphocyte_percent", "Red_cell_distribution_width","Mean_cell_volume")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2007-2008/BIOPRO_E.xpt", tf <- tempfile(), mode="wb")
+Biochemistry_1 <- foreign::read.xport(tf)[,c("SEQN","LBDSALSI","LBDSCRSI","LBDSGLSI","LBXSAPSI")]
+names(Biochemistry_1) <- c("SEQN", "Albumin", "Creatinine", "Glucose_serum","Alkaline_phosphotase")
+
+PhenoAge_1 <- merge(BloodCount_1, Biochemistry_1, by = "SEQN", all.x = TRUE)
+```
+
+
+```{r}
+#2009-2010 data cycle
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/CBC_F.xpt", tf <- tempfile(), mode="wb")
+BloodCount_2 <- foreign::read.xport(tf)[,c("SEQN", "LBXWBCSI", "LBXLYPCT","LBXRDW", "LBXMCVSI")]
+names(BloodCount_2) <- c("SEQN", "White_blood_cell_count", "Lymphocyte_percent", "Red_cell_distribution_width","Mean_cell_volume")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2009-2010/BIOPRO_F.xpt", tf <- tempfile(), mode="wb")
+Biochemistry_2 <- foreign::read.xport(tf)[,c("SEQN","LBDSALSI","LBDSCRSI","LBDSGLSI","LBXSAPSI")]
+names(Biochemistry_2) <- c("SEQN", "Albumin", "Creatinine", "Glucose_serum","Alkaline_phosphotase")
+
+PhenoAge_2 <- merge(BloodCount_2, Biochemistry_2, by = "SEQN", all.x = TRUE)
+```
+
+```{r}
+#2011-2012 data cycle
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/CBC_G.xpt", tf <- tempfile(), mode="wb")
+BloodCount_3 <- foreign::read.xport(tf)[,c("SEQN", "LBXWBCSI", "LBXLYPCT","LBXRDW", "LBXMCVSI")]
+names(BloodCount_3) <- c("SEQN", "White_blood_cell_count", "Lymphocyte_percent", "Red_cell_distribution_width","Mean_cell_volume")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2011-2012/BIOPRO_G.xpt", tf <- tempfile(), mode="wb")
+Biochemistry_3 <- foreign::read.xport(tf)[,c("SEQN","LBDSALSI","LBDSCRSI","LBDSGLSI","LBXSAPSI")]
+names(Biochemistry_3) <- c("SEQN", "Albumin", "Creatinine", "Glucose_serum","Alkaline_phosphotase")
+
+# Merge the result
+PhenoAge_3 <- merge(BloodCount_3, Biochemistry_3, by = "SEQN", all.x = TRUE)
+```
+
+
+
+```{r}
+#2013-2014 data cycle
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/CBC_H.xpt", tf <- tempfile(), mode="wb")
+BloodCount_4 <- foreign::read.xport(tf)[,c("SEQN", "LBXWBCSI", "LBXLYPCT","LBXRDW", "LBXMCVSI")]
+names(BloodCount_4) <- c("SEQN", "White_blood_cell_count", "Lymphocyte_percent", "Red_cell_distribution_width","Mean_cell_volume")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/BIOPRO_H.xpt", tf <- tempfile(), mode="wb")
+Biochemistry_4 <- foreign::read.xport(tf)[,c("SEQN","LBDSALSI","LBDSCRSI","LBDSGLSI","LBXSAPSI")]
+names(Biochemistry_4) <- c("SEQN", "Albumin", "Creatinine", "Glucose_serum","Alkaline_phosphotase")
+
+# Merge the result
+PhenoAge_4 <- merge(BloodCount_4, Biochemistry_4, by = "SEQN", all.x = TRUE)
+```
+
+```{r}
+#2015-2016 data cycle 
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/CBC_I.xpt", tf <- tempfile(), mode="wb")
+BloodCount_5 <- foreign::read.xport(tf)[,c("SEQN", "LBXWBCSI", "LBXLYPCT","LBXRDW", "LBXMCVSI")]
+names(BloodCount_5) <- c("SEQN", "White_blood_cell_count", "Lymphocyte_percent", "Red_cell_distribution_width","Mean_cell_volume")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2015-2016/BIOPRO_I.xpt", tf <- tempfile(), mode="wb")
+Biochemistry_5 <- foreign::read.xport(tf)[,c("SEQN","LBDSALSI","LBDSCRSI","LBDSGLSI","LBXSAPSI")]
+names(Biochemistry_5) <- c("SEQN", "Albumin", "Creatinine", "Glucose_serum","Alkaline_phosphotase")
+
+PhenoAge_5 <- merge(BloodCount_5, Biochemistry_5, by = "SEQN", all.x = TRUE)
+```
+
+```{r}
+#2017-2020 data cycle 
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_CBC.xpt", tf <- tempfile(), mode="wb")
+BloodCount_6 <- foreign::read.xport(tf)[,c("SEQN", "LBXWBCSI", "LBXLYPCT","LBXRDW", "LBXMCVSI")]
+names(BloodCount_6) <- c("SEQN", "White_blood_cell_count", "Lymphocyte_percent", "Red_cell_distribution_width","Mean_cell_volume")
+
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2017-2018/P_BIOPRO.xpt", tf <- tempfile(), mode="wb")
+Biochemistry_6 <- foreign::read.xport(tf)[,c("SEQN","LBDSALSI","LBDSCRSI","LBDSGLSI","LBXSAPSI")]
+names(Biochemistry_6) <- c("SEQN", "Albumin", "Creatinine", "Glucose_serum","Alkaline_phosphotase")
+
+PhenoAge_6 <- merge(BloodCount_6, Biochemistry_6, by = "SEQN", all.x = TRUE)
+```
+
+
+```{r}
+PhenoAge_fall <- bind_rows(PhenoAge_1, PhenoAge_2, PhenoAge_3, PhenoAge_4, PhenoAge_5, PhenoAge_6)
+
+Falldat_Pheno <- merge(Falldat, PhenoAge_fall, by = "SEQN", all.x = TRUE)
+```
+
+
+
+
+```{r}
+Falldat_Pheno <- Falldat_Pheno %>%
+  filter(!is.na(White_blood_cell_count), !is.na(Lymphocyte_percent), !is.na(Red_cell_distribution_width), !is.na(Mean_cell_volume), !is.na(Albumin),
+         !is.na(Creatinine), !is.na(Glucose_serum), !is.na(Alkaline_phosphotase))
+# excluded people who did not test blood in lab (missing data), so we included 21,314 people.
+
+# calculate PhenoAge
+Falldat_Pheno$xb <- -19.90667 + (-0.03359355 * Falldat_Pheno$Albumin) + (0.009506491 * Falldat_Pheno$Creatinine) + (0.1953192 * Falldat_Pheno$Glucose_serum) + (-0.01199984 * Falldat_Pheno$Lymphocyte_percent) + (0.02676401 * Falldat_Pheno$Mean_cell_volume) + (0.3306156 * Falldat_Pheno$Red_cell_distribution_width) + (0.001868778 * Falldat_Pheno$Alkaline_phosphotase) + (0.05542406 * Falldat_Pheno$White_blood_cell_count) + (0.08035356 * Falldat_Pheno$chronological_age)
+
+
+Falldat_Pheno$Phenotypic_Age <- 141.50225 + (log(-0.0055305 * log(exp(-1.51714 * exp(Falldat_Pheno$xb) / 0.007692696)))) / 0.09165
+
+#Testing normality and distribution of pheno-age
+Phenotypic_Age <- Falldat_Pheno$Phenotypic_Age
+# Histogram
+ggplot(Falldat_Pheno, aes(x = Phenotypic_Age)) +
+  geom_histogram(binwidth = 1, color = "black", fill = "skyblue", alpha = 0.7) +
+  labs(title = "Distribution of Phenotypic Age",
+       x = "Phenotypic Age",
+       y = "Frequency") +
+  theme_minimal()
+
+# QQ Plot
+# Filter out non-finite values
+filtered_data <- Falldat_Pheno[is.finite(Falldat_Pheno$Phenotypic_Age), ]
+
+# Create a Q-Q plot
+ggplot(filtered_data, aes(sample = Phenotypic_Age)) +
+  geom_qq() +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +  # Add a reference line
+  labs(title = "Q-Q Plot of Phenotypic Age",
+       x = "Theoretical Quantiles",
+       y = "Sample Quantiles") +
+  theme_minimal()
+
+# Density plot
+plot(density(Falldat_Pheno$Phenotypic_Age), main = "Density Plot of Phenotypic Age", xlab = "Phenotypic Age")
+
+# Calculate the quartiles
+q <- quantile(Falldat_Pheno$Phenotypic_Age, probs = c(0.25, 0.75), na.rm = TRUE)
+
+# Calculate the interquartile range (IQR)
+iqr <- q[2] - q[1]
+
+# Set the upper and lower bounds for outliers
+upper_bound_1 <- q[2] + 1.5 * iqr
+lower_bound_1 <- q[1] - 1.5 * iqr
+
+# Create a data frame for outliers
+outliers <- subset(Falldat_Pheno, Phenotypic_Age > upper_bound_1 | Phenotypic_Age < lower_bound_1)
+
+# Create the box plot
+ggplot(Falldat_Pheno, aes(y = Phenotypic_Age)) +
+  geom_boxplot(color = "black", fill = "skyblue", outlier.color = "red", outlier.shape = 16) +
+  geom_jitter(data = outliers, aes(x = 0.5, y = Phenotypic_Age), color = "red", size = 2, alpha = 0.5) +
+  labs(title = "Box Plot of Phenotypic Age with Outliers",
+       y = "Phenotypic Age") +
+  theme_minimal()
+
+# Remove outliers from the dataset
+Falldat_Pheno <- subset(Falldat_Pheno, Phenotypic_Age >= lower_bound_1 & Phenotypic_Age <= upper_bound_1)
+
+# Last we included 21,246 people (PhenoAge group)
+```
+
+#Examine the MET and Phenotypic_Age
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+
+ggplot(Falldat_Pheno, aes(x = Total_MET)) +
+  geom_histogram(binwidth = 100, color = "skyblue", fill = "red", alpha = 0.7) +
+  labs(title = "Distribution of Total_MET",
+       x = "Total_MET",
+       y = "Frequency") +
+  theme_minimal()
+
+ggplot(Falldat_Pheno, aes(x = Total_MET, y = Phenotypic_Age)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) + 
+  labs(x = "Total_MET", y = "Phenotypic_Age", title = "Scatter Plot Total_MET vs Phenotypic_Age with Regression Line")
+
+Falldat_Pheno$categorize_MET <- ifelse(Falldat_Pheno$Total_MET < 600, "1", "2")
+
+# Define breaks for age groups
+breaks <- c(20, 45, 65, Inf)  # Breaks represent the age boundaries
+
+# Define labels for the age groups
+labels <- c("1", "2", "3")
+
+# Categorize chronological_age into groups and assign custom labels
+Falldat_Pheno$cate_age <- cut(Falldat_Pheno$chronological_age, breaks = breaks, labels = labels, include.lowest = TRUE)
+```
+
+#Main model of regression for association, and adjust for covariates
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+
+# svy design
+des <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = Falldat_Pheno)#adjust weight before modelling
+
+
+#model_1 -- non-adjusted
+model_1 <- svyglm(Phenotypic_Age ~ categorize_MET, data = Falldat_Pheno, design = des, family = "gaussian") 
+summary(model_1)
+
+#model_2 -- adjusted for chronological_age, Gender, Race, CDAI, Marital_Status and family Ratio_income_poverty.
+model_2 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                  , data = Falldat_Pheno, design = des, family = "gaussian") 
+
+summary(model_2)
+
+vif_model_2 <- vif(model_2)
+print(vif_model_2)
+
+#model_3 -- adjusted for BMI + sleep_disorders + Smoked_days + Avg_alcohol_drinks + had_cancer.
+model_3 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                  , data = Falldat_Pheno, design = des, family = "gaussian") 
+summary(model_3)
+
+vif_model_3 <- vif(model_3)
+print(vif_model_3)
+
+#effect modifier 1 - MET
+model_X <- svyglm(Phenotypic_Age ~ Total_MET + as.factor(categorize_MET) + Total_MET*as.factor(categorize_MET), data = Falldat_Pheno, design = des, family = "gaussian")
+summary(model_X)
+
+```
+
+#considering non-linear regression
+```{r}
+library("broom")
+library("MASS")
+non_model_1 <- svyglm(Phenotypic_Age ~ rcs(Total_MET, 3),
+                        data = Falldat_Pheno, design = des, family = "gaussian")
+
+non_model_2 <- svyglm(Phenotypic_Age ~ rcs(Total_MET, 4),
+                        data = Falldat_Pheno, design = des, family = "gaussian")
+
+non_model_3 <- svyglm(Phenotypic_Age ~ rcs(Total_MET, 5),
+                        data = Falldat_Pheno, design = des, family = "gaussian")
+
+non_model_4 <- svyglm(Phenotypic_Age ~ rcs(Total_MET, 6),
+                        data = Falldat_Pheno, design = des, family = "gaussian")
+
+non_model_5 <- svyglm(Phenotypic_Age ~ rcs(Total_MET, 7),
+                        data = Falldat_Pheno, design = des, family = "gaussian")
+
+summary(non_model_2)
+```
+
+```{r}
+AIC(non_model_1, non_model_2, non_model_3, non_model_4, non_model_5)
+```
+
+
+```{r}
+# Predict Phenotypic Age using non_model_2
+pr1 <- predict(non_model_2, type = "response")
+
+# Fit a linear regression model with a restricted cubic spline of Total_MET
+model.spline <- lm(pr1 ~ rcs(Falldat_Pheno$Total_MET))
+
+
+knot <- rcs(Falldat_Pheno$Total_MET, n=4)
+
+summary(model.spline)
+
+anova(model.spline)
+```
+
+```{r}
+ggplot(Falldat_Pheno, aes(Total_MET, Phenotypic_Age)) +
+  stat_smooth(method = lm, formula = y ~ rcs(x,4)) +
+  theme_bw() +
+  theme(panel.grid.major =
+  element_blank(), panel.grid.minor = element_blank()) +
+    xlab("Total_MET") +
+    ylab("Phenotypic_Age") +
+    ggtitle("RCS")
+
+
+
+```
+
+
+```{r}
+# Calculate the quantiles of Total_MET
+quantiles <- quantile(Falldat_Pheno$Total_MET, c(0.05, 0.35, 0.65, 0.95))
+
+# Create the plot with the RCS smooth
+ggplot(Falldat_Pheno, aes(Total_MET, Phenotypic_Age)) +
+  stat_smooth(method = lm, formula = y ~ rcs(x, 4)) +
+  
+  # Add vertical dashed lines at the quantiles
+  geom_vline(xintercept = quantiles, linetype = "dashed", color = "red") +
+  
+  # Theme settings
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  
+  # Labels and title
+  xlab("Total_MET") +
+  ylab("Phenotypic_Age") +
+  ggtitle("RCS")
+
+```
+
+
+
+```{r}
+
+
+```
+
+```{r}
+
+
+```
+
+
+
+
+#Main model of regression for association, and adjust for covariates
+```{r}
+model_4 <- svyglm(Phenotypic_Age ~ categorize_PA, data = Falldat_Pheno, design = des, family = "gaussian") 
+summary(model_4)
+
+#model 2 -- adjusted for chronological_age, Gender, Race, CDAI, Marital_Status and family Ratio_income_poverty.
+model_5 <- svyglm(Phenotypic_Age ~ categorize_PA + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                  , data = Falldat_Pheno, design = des, family = "gaussian") 
+
+summary(model_5)
+
+vif_model_5 <- vif(model_5)
+print(vif_model_5)
+
+#model 3 -- adjusted for BMI + sleep_disorders + Smoked_days + Avg_alcohol_drinks + had_cancer.
+model_6 <- svyglm(Phenotypic_Age ~ categorize_PA + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                  , data = Falldat_Pheno, design = des, family = "gaussian") 
+summary(model_6)
+
+vif_model_6 <- vif(model_6)
+print(vif_model_6)
+
+#effect modifier 1 - MET
+model_Y <- svyglm(Phenotypic_Age ~ Total_MET + as.factor(categorize_PA) + Total_MET*as.factor(categorize_PA), data = Falldat_Pheno, design = des, family = "gaussian")
+summary(model_Y)
+```
+
+#check effect modifiers
+```{r echo=FALSE,message=FALSE,warning=TRUE}
+#Subgroup analysis for gender, race, BMI, income, smoking and cancer
+#for subgroup analysis by gender
+men <- Falldat_Pheno[Falldat_Pheno$Gender == 1, ]
+women <- Falldat_Pheno[Falldat_Pheno$Gender == 2, ]
+desmen <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = men) #select men
+deswomen <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = women) #select women
+model_men <- svyglm(Phenotypic_Age ~ categorize_MET, data = men, design = desmen, family = "gaussian")
+summary(model_men)
+model_women <- svyglm(Phenotypic_Age ~ categorize_MET, data = women, design = deswomen, family = "gaussian")
+summary(model_women)
+
+coef(model_men)["categorize_MET2"]  
+confint(model_men)["categorize_MET2", ]  
+summary(model_men)$coefficients["categorize_MET2", "Pr(>|t|)"]  
+
+coef(model_women)["categorize_MET2"]  
+confint(model_women)["categorize_MET2", ]  
+summary(model_women)$coefficients["categorize_MET2", "Pr(>|t|)"]  
+
+
+# Fit separate models adjusting only for Gender
+model_a1 <- svyglm(Phenotypic_Age ~ categorize_MET + Race + CDAI + Marital_Status + Ratio_income_poverty
+                  , data = men, design = desmen, family = "gaussian")
+summary(model_a1)
+
+model_a2 <- svyglm(Phenotypic_Age ~ categorize_MET + Race + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = women, design = deswomen, family = "gaussian")
+summary(model_a2)
+
+model_a3 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = men, design = desmen, family = "gaussian")
+summary(model_a3)
+
+model_a4 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = women, design = deswomen, family = "gaussian")
+summary(model_a4)
+
+
+options( survey.lonely.psu = "adjust" )
+
+#for subgroup analysis by Race
+Mexican <- Falldat_Pheno[Falldat_Pheno$Race == 1, ]
+Other_Hispanic <- Falldat_Pheno[Falldat_Pheno$Race == 2, ]
+Non_Hispanic_white <- Falldat_Pheno[Falldat_Pheno$Race == 3, ]
+Non_Hispanic_Black <- Falldat_Pheno[Falldat_Pheno$Race == 4, ]
+Other_Race <- Falldat_Pheno[Falldat_Pheno$Race == 5, ]
+
+
+des_Me <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = Mexican) 
+des_Hispanic <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = Other_Hispanic) 
+des_white <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = Non_Hispanic_white) 
+des_Black <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = Non_Hispanic_Black) 
+des_Other <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = Other_Race) 
+
+model_Me <- svyglm(Phenotypic_Age ~ categorize_MET, data = Mexican, design = des_Me, family = "gaussian")
+summary(model_Me)
+model_Hispanic <- svyglm(Phenotypic_Age ~ categorize_MET, data = Other_Hispanic, design = des_Hispanic, family = "gaussian")
+summary(model_Hispanic)
+model_white <- svyglm(Phenotypic_Age ~ categorize_MET, data = Non_Hispanic_white, design = des_white, family = "gaussian")
+summary(model_white)
+model_Black <- svyglm(Phenotypic_Age ~ categorize_MET, data = Non_Hispanic_Black, design = des_Black, family = "gaussian")
+summary(model_Black)
+model_Other <- svyglm(Phenotypic_Age ~ categorize_MET, data = Other_Race, design = des_Other, family = "gaussian")
+summary(model_Other)
+
+# Fit separate models adjusting only for Race
+model_b1 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = Mexican, design = des_Me, family = "gaussian")
+summary(model_b1)
+
+model_b2 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = Mexican, design = des_Me, family = "gaussian")
+summary(model_b2)
+
+model_b3 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = Other_Hispanic, design = des_Hispanic, family = "gaussian")
+summary(model_b3)
+
+model_b4 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = Other_Hispanic, design = des_Hispanic, family = "gaussian")
+summary(model_b4)
+
+model_b5 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = Non_Hispanic_white, design = des_white, family = "gaussian")
+summary(model_b5)
+
+model_b6 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = Non_Hispanic_white, design = des_white, family = "gaussian")
+summary(model_b6)
+
+model_b7 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = Non_Hispanic_Black, design = des_Black, family = "gaussian")
+summary(model_b7)
+
+model_b8 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = Non_Hispanic_Black, design = des_Black, family = "gaussian")
+summary(model_b8)
+
+model_b9 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = Other_Race, design = des_Other, family = "gaussian")
+summary(model_b9)
+
+model_b10 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = Other_Race, design = des_Other, family = "gaussian")
+summary(model_b10)
+
+
+
+##for subgroup analysis by BMI
+Falldat_Pheno$BMI[is.na(Falldat_Pheno$BMI)] <- 0
+BMI_1 <- Falldat_Pheno[Falldat_Pheno$BMI < 25, ]
+BMI_2 <- Falldat_Pheno[Falldat_Pheno$BMI >= 25 & Falldat_Pheno$BMI < 30, ]
+BMI_3 <- Falldat_Pheno[Falldat_Pheno$BMI >= 30, ]
+desBMI_1 <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = BMI_1) #select BMI < 25
+desBMI_2 <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = BMI_2) #select 25 =< BMI <30
+desBMI_3 <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = BMI_3) #select >= 30
+model_BMI_1 <- svyglm(Phenotypic_Age ~ categorize_MET, data = BMI_1, design = desBMI_1, family = "gaussian")
+summary(model_BMI_1)
+model_BMI_2 <- svyglm(Phenotypic_Age ~ categorize_MET, data = BMI_2, design = desBMI_2, family = "gaussian")
+summary(model_BMI_2)
+model_BMI_3 <- svyglm(Phenotypic_Age ~ categorize_MET, data = BMI_3, design = desBMI_3, family = "gaussian")
+summary(model_BMI_3)
+
+
+# Fit separate models adjusting only for BMI
+model_c1 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = BMI_1, design = desBMI_1, family = "gaussian")
+summary(model_c1)
+
+model_c2 <- svyglm(Phenotypic_Age ~ categorize_MET + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = BMI_1, design = desBMI_1, family = "gaussian")
+summary(model_c2)
+
+model_c3 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = BMI_2, design = desBMI_2, family = "gaussian")
+summary(model_c3)
+
+model_c4 <- svyglm(Phenotypic_Age ~ categorize_MET + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = BMI_2, design = desBMI_2, family = "gaussian")
+summary(model_c4)
+
+model_c5 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = BMI_3, design = desBMI_3, family = "gaussian")
+summary(model_c5)
+
+model_c6 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = BMI_3, design = desBMI_3, family = "gaussian")
+summary(model_c6)
+
+
+
+##for subgroup analysis by income
+Falldat_Pheno$Ratio_income_poverty[is.na(Falldat_Pheno$Ratio_income_poverty)] <- 0
+income_1 <- Falldat_Pheno[Falldat_Pheno$Ratio_income_poverty <= 1, ]
+income_2 <- Falldat_Pheno[Falldat_Pheno$Ratio_income_poverty > 1 & Falldat_Pheno$Ratio_income_poverty < 4, ]
+income_3 <- Falldat_Pheno[Falldat_Pheno$Ratio_income_poverty >= 4, ]
+desincome_1 <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = income_1) #select income <= 1
+desincome_2 <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = income_2) #select 1 < income < 4
+desincome_3 <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = income_3) #select >= 4
+model_income_1 <- svyglm(Phenotypic_Age ~ categorize_MET, data = income_1, design = desincome_1, family = "gaussian")
+summary(model_income_1)
+model_income_2 <- svyglm(Phenotypic_Age ~ categorize_MET, data = income_2, design = desincome_2, family = "gaussian")
+summary(model_income_2)
+model_income_3 <- svyglm(Phenotypic_Age ~ categorize_MET, data = income_3, design = desincome_3, family = "gaussian")
+summary(model_income_3)
+
+
+# Fit separate models adjusting only for income
+model_d1 <- svyglm(Phenotypic_Age ~ categorize_MET + Race + Gender + CDAI + Marital_Status
+                   , data = income_1, design = desincome_1, family = "gaussian")
+summary(model_d1)
+
+model_d2 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = income_1, design = desincome_1, family = "gaussian")
+summary(model_d2)
+
+model_d3 <- svyglm(Phenotypic_Age ~ categorize_MET + Race + Gender + CDAI + Marital_Status
+                   , data = income_2, design = desincome_2, family = "gaussian")
+summary(model_d3)
+
+model_d4 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = income_2, design = desincome_2, family = "gaussian")
+summary(model_d4)
+
+model_d5 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + Race + CDAI + Marital_Status
+                   , data = income_3, design = desincome_3, family = "gaussian")
+summary(model_d5)
+
+model_d6 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks + had_cancer
+                   , data = income_3, design = desincome_3, family = "gaussian")
+summary(model_d6)
+
+
+
+#for subgroup analysis by cancer
+cancer <- Falldat_Pheno[Falldat_Pheno$had_cancer == 1, ]
+cancer$had_cancer[is.na(cancer$had_cancer)] <- 0
+cancer <- cancer[cancer$had_cancer != 0, , drop = FALSE]
+
+non_cancer <- Falldat_Pheno[Falldat_Pheno$had_cancer == 2, ]
+non_cancer$had_cancer[is.na(non_cancer$had_cancer)] <- 0
+non_cancer <- non_cancer[non_cancer$had_cancer != 0, , drop = FALSE]
+
+des_cancer <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = cancer) 
+des_non_cancer <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = non_cancer) 
+
+model_cancer <- svyglm(Phenotypic_Age ~ categorize_MET, data = cancer, design = des_cancer, family = "gaussian")
+summary(model_cancer)
+model_non_cancer <- svyglm(Phenotypic_Age ~ categorize_MET, data = non_cancer, design = des_non_cancer, family = "gaussian")
+summary(model_non_cancer)
+
+# Fit separate models adjusting only for cancer
+model_e1 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = cancer, design = des_cancer, family = "gaussian")
+summary(model_e1)
+
+
+model_e2 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks 
+                   , data = cancer, design = des_cancer, family = "gaussian")
+summary(model_e2)
+
+model_e3 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = non_cancer, design = des_non_cancer, family = "gaussian")
+summary(model_e3)
+
+model_e4 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Smoked_days + now_smoke + quit_smoking + Avg_alcohol_drinks
+                   , data = non_cancer, design = des_non_cancer, family = "gaussian")
+summary(model_e4)
+
+
+
+
+##for subgroup analysis by smoking
+Falldat_Pheno$quit_smoking[is.na(Falldat_Pheno$quit_smoking)] <- 0
+Falldat_Pheno$now_smoke[is.na(Falldat_Pheno$now_smoke)] <- 0
+current_smokers <- Falldat_Pheno[Falldat_Pheno$Smoked_days == 1 & Falldat_Pheno$now_smoke == 1, ]
+former_smokers <- Falldat_Pheno[Falldat_Pheno$Smoked_days == 1 & Falldat_Pheno$quit_smoking > 1, ]
+former_smokers$psu[is.na(former_smokers$psu)] <- 0
+former_smokers <- former_smokers[former_smokers$psu != 0, , drop = FALSE]
+
+non_smokers <- Falldat_Pheno[Falldat_Pheno$Smoked_days == 2, ]
+non_smokers$Smoked_days[is.na(non_smokers$Smoked_days)] <- 0
+non_smokers <- non_smokers[non_smokers$Smoked_days != 0, , drop = FALSE]
+#select hose who were considered current smokers smoked on a regular basis and had smoked at least 100 cigarettes in their lifetime.
+descurrent_smokers <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = current_smokers)
+#select Former smokers had smoked at least 100 cigarettes and had since quit.
+desformer_smokers <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = former_smokers) 
+#select Non-smokers had either never smoked or smoked fewer than 100 cigarettes
+desnon_smokers <- svydesign(id =~ psu, strata =~ Strata, weights =~ weight_2, nest = TRUE, data = non_smokers) 
+
+model_current_smokers <- svyglm(Phenotypic_Age ~ categorize_MET, data = current_smokers, design = descurrent_smokers, family = "gaussian")
+summary(model_current_smokers)
+model_former_smokers <- svyglm(Phenotypic_Age ~ categorize_MET, data = former_smokers, design = desformer_smokers, family = "gaussian")
+summary(model_former_smokers)
+model_non_smokers <- svyglm(Phenotypic_Age ~ categorize_MET, data = non_smokers, design = desnon_smokers, family = "gaussian")
+summary(model_non_smokers)
+
+
+# Fit separate models adjusting only for smoking
+model_f1 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = current_smokers, design = descurrent_smokers, family = "gaussian")
+summary(model_f1)
+
+model_f2 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Avg_alcohol_drinks + had_cancer
+                   , data = current_smokers, design = descurrent_smokers, family = "gaussian")
+summary(model_f2)
+
+model_f3 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = former_smokers, design = desformer_smokers, family = "gaussian")
+summary(model_f3)
+
+model_f4 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Avg_alcohol_drinks + had_cancer
+                   , data = former_smokers, design = desformer_smokers, family = "gaussian")
+summary(model_f4)
+
+model_f5 <- svyglm(Phenotypic_Age ~ categorize_MET + Gender + Race + CDAI + Marital_Status + Ratio_income_poverty
+                   , data = non_smokers, design = desnon_smokers, family = "gaussian")
+summary(model_f5)
+
+model_f6 <- svyglm(Phenotypic_Age ~ categorize_MET + BMI + sleep_disorders + Avg_alcohol_drinks + had_cancer
+                   , data = non_smokers, design = desnon_smokers, family = "gaussian")
+summary(model_f6)
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
